@@ -188,25 +188,20 @@ public class login extends javax.swing.JFrame {
     }//GEN-LAST:event_emailActionPerformed
 
     private void loginbtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loginbtnActionPerformed
-        String userEmail = email.getText();
-        String userPassword = new String(password.getPassword());
+          String userEmail = email.getText();
+            String userPassword = new String(password.getPassword());
 
-    dashboard evaluation = new dashboard();    
-    try {
-    PreparedStatement ps = con.prepareStatement("SELECT * FROM admin WHERE email = ? AND password = ?");
-    ps.setString(1, userEmail);
-    ps.setString(2, userPassword);
-    ResultSet rs = ps.executeQuery();
-    if (rs.next()) {
+    if (authenticate(userEmail, userPassword)) {
         // If login is successful, close the success message dialog
         JOptionPane.showMessageDialog(this, "Login successful!");
-        
+
         // Close the login frame or panel
         setVisible(false); // Assuming this code is inside your login frame or panel
-        
-        // Show the labs page
+
+        // Show the dashboard page
+        dashboard evaluation = new dashboard();
         evaluation.setVisible(true);
-        
+
         // Optionally, you can clear the input fields after successful login
         email.setText("");
         password.setText("");
@@ -214,12 +209,25 @@ public class login extends javax.swing.JFrame {
         // If login fails, show an error dialog
         JOptionPane.showMessageDialog(this, "Login failed. Please check your credentials.", "Error", JOptionPane.ERROR_MESSAGE);
     }
-} catch (SQLException ex) {
-    java.util.logging.Logger.getLogger(login.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-}
 
     }//GEN-LAST:event_loginbtnActionPerformed
+    
+    private boolean authenticate(String userEmail, String userPassword) {
+ 
+    // Implement your actual authentication logic here, such as querying the database
+    try {
+        Connection con = DriverManager.getConnection("jdbc:mysql://localhost/evaluation", "root", "12345");
+        PreparedStatement ps = con.prepareStatement("SELECT * FROM admin WHERE email = ? AND password = ?");
+        ps.setString(1, userEmail);
+        ps.setString(2, userPassword);
+        ResultSet rs = ps.executeQuery();
+        return rs.next(); // Return true if there is at least one row in the result set (i.e., authentication successful)
+    } catch (SQLException ex) {
+        java.util.logging.Logger.getLogger(login.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        return false; // Return false if an exception occurs (i.e., authentication failed)
+    }
 
+}
     private void jLabel4MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel4MouseClicked
     register signUpWindow = new register();
     signUpWindow.setVisible(true);
