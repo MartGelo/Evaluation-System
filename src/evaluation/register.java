@@ -8,6 +8,7 @@ package evaluation;
 
 
 
+import com.mysql.jdbc.ResultSet;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.DriverManager;
@@ -65,7 +66,6 @@ public class register extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(1520, 790));
-        setPreferredSize(new java.awt.Dimension(487, 519));
         getContentPane().setLayout(null);
 
         jPanel1.setBackground(new java.awt.Color(255, 255, 255));
@@ -213,39 +213,42 @@ public class register extends javax.swing.JFrame {
 
     private void registerbtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_registerbtnActionPerformed
       String userEmail = email.getText();
-      String userPassword = new String(password.getPassword());
-      String userFullName = fullname.getText();
+String userPassword = new String(password.getPassword());
+String userFullName = fullname.getText();
 
-        // Check if any field is empty
-if (userEmail.isEmpty() || userPassword.isEmpty() || userFullName.isEmpty()) {
-    JOptionPane.showMessageDialog(this, "Please fill in all fields.", "Error", JOptionPane.ERROR_MESSAGE);
-} else {
-        try {
-            
-            PreparedStatement ps = con.prepareStatement("INSERT INTO admin (fullname, email, password) VALUES (?, ?, ?)");
-            ps.setString(1, userFullName);
-            ps.setString(2, userEmail);
-            ps.setString(3, userPassword);
+try {
+    // Check if email or fullname already exists
+    PreparedStatement checkStmt = con.prepareStatement("SELECT * FROM admin WHERE email = ? OR fullname = ?");
+    checkStmt.setString(1, userEmail);
+    checkStmt.setString(2, userFullName);
+    ResultSet rs = (ResultSet) checkStmt.executeQuery();
 
+    if (rs.next()) {
+        // If either email or fullname exists, show an error message
+        JOptionPane.showMessageDialog(this, "Email or Fullname is already in use. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+    } else {
+        // If email and fullname do not exist, proceed with insertion
+        PreparedStatement ps = con.prepareStatement("INSERT INTO admin (email, password, fullname, status) VALUES (?, ?, ?, ?)");
+        ps.setString(1, userEmail);
+        ps.setString(2, userPassword);
+        ps.setString(3, userFullName);
+        ps.setString(4, "user"); // Set the default status as "user"
 
-            int rowsInserted = ps.executeUpdate();
-            if (rowsInserted > 0) {
-                JOptionPane.showMessageDialog(this, "Sign up successful!");
-                 login loginForm = new login();
-                 loginForm.setVisible(true);
-                 this.dispose();
-                
-                email.setText("");
-                password.setText("");
-                fullname.setText("");
-            } else {
-                JOptionPane.showMessageDialog(this, "Sign up failed. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
-            }
+        int rowsInserted = ps.executeUpdate();
+        if (rowsInserted > 0) {
+            JOptionPane.showMessageDialog(this, "Sign up successful!");
 
-        } catch (SQLException ex) {
-            Logger.getLogger(register.class.getName()).log(Level.SEVERE, null, ex);
+            email.setText("");
+            password.setText("");
+            fullname.setText("");
+        } else {
+            JOptionPane.showMessageDialog(this, "Sign up failed. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
+} catch (SQLException ex) {
+    Logger.getLogger(register.class.getName()).log(Level.SEVERE, null, ex);
 }
+
     }//GEN-LAST:event_registerbtnActionPerformed
 
     private void fullnameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fullnameActionPerformed

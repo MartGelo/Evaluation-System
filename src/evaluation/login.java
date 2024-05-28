@@ -4,6 +4,7 @@ package evaluation;
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
+import java.io.IOException;
 import java.sql.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -61,7 +62,6 @@ public class login extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(255, 0, 153));
         setMinimumSize(new java.awt.Dimension(1520, 790));
-        setPreferredSize(new java.awt.Dimension(1520, 790));
         getContentPane().setLayout(null);
 
         jPanel1.setBackground(new java.awt.Color(255, 255, 255));
@@ -194,46 +194,50 @@ public class login extends javax.swing.JFrame {
     }//GEN-LAST:event_emailActionPerformed
 
     private void loginbtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loginbtnActionPerformed
-          String userEmail = email.getText();
-            String userPassword = new String(password.getPassword());
+        String userEmail = email.getText();
+    String userPassword = new String(password.getPassword());
 
-    if (authenticate(userEmail, userPassword)) {
-        // If login is successful, close the success message dialog
-        JOptionPane.showMessageDialog(this, "Login successful!");
-
-        // Close the login frame or panel
-        setVisible(false); // Assuming this code is inside your login frame or panel
-
-        // Show the dashboard page
-        dashboard evaluation = new dashboard();
-        evaluation.setVisible(true);
-
-        // Optionally, you can clear the input fields after successful login
-        email.setText("");
-        password.setText("");
-    } else {
-        // If login fails, show an error dialog
-        JOptionPane.showMessageDialog(this, "Login failed. Please check your credentials.", "Error", JOptionPane.ERROR_MESSAGE);
-    }
-
-    }//GEN-LAST:event_loginbtnActionPerformed
+    dashboard dashboardPanel = new dashboard();    
+    evaluationForm userPanel = new evaluationForm();
     
-    private boolean authenticate(String userEmail, String userPassword) {
- 
-    // Implement your actual authentication logic here, such as querying the database
+
     try {
-        Connection con = DriverManager.getConnection("jdbc:mysql://localhost/evaluation", "root", "12345");
-        PreparedStatement ps = con.prepareStatement("SELECT * FROM admin WHERE email = ? AND password = ?");
+        PreparedStatement ps = (PreparedStatement) con.prepareStatement("SELECT * FROM admin WHERE email = ? AND password = ?");
         ps.setString(1, userEmail);
         ps.setString(2, userPassword);
         ResultSet rs = ps.executeQuery();
-        return rs.next(); // Return true if there is at least one row in the result set (i.e., authentication successful)
+        if (rs.next()) {
+            String userStatus = rs.getString("status"); // Assuming the column name for status is "status"
+
+            // If login is successful, close the success message dialog
+            JOptionPane.showMessageDialog(this, "Login successful!");
+
+            // Close the login frame or panel
+            setVisible(false); // Assuming this code is inside your login frame or panel
+
+            if (userStatus.equalsIgnoreCase("admin")) { // Assuming the status is either "admin" or "user"
+                // Show the dashboard panel
+                dashboardPanel.setVisible(true);
+            } else { // Assuming the status is either "admin" or "user"
+                // Show the user panel
+                userPanel.setVisible(true);
+            }
+
+            // Optionally, you can clear the input fields after successful login
+            email.setText("");
+            password.setText("");
+        } else {
+            // If login fails, show an error dialog
+            JOptionPane.showMessageDialog(this, "Login failed. Please check your credentials.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
     } catch (SQLException ex) {
         java.util.logging.Logger.getLogger(login.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        return false; // Return false if an exception occurs (i.e., authentication failed)
     }
+    
 
-}
+    }//GEN-LAST:event_loginbtnActionPerformed
+    
+    
     private void jLabel4MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel4MouseClicked
     register signUpWindow = new register();
     signUpWindow.setVisible(true);
